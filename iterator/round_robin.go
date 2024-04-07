@@ -3,7 +3,7 @@ package iterator
 import (
 	"sync/atomic"
 
-	"github.com/sotnikov-s/go-load-balancer/proxy"
+	"github.com/open-webtech/go-load-balancer/proxy"
 )
 
 // NewRoundRobin accepts a number of proxies to be used in the RoundRobin iterator

@@ -1,32 +1,33 @@
-# golang load balancer
+# Go Load Balancer
 
-A load balancer is a device that, behaving as a reverse proxy, uses a number of remote servers to improve computing performance by distributing workloads across the servers.
+This module provides a simple load balancer implementation written in Go.
 
-* [Algorithms](#algorithms)
-* [Schema](#schema)
-* [Example](#example)
+## Supported Algorithms
 
----
+The load balancer supports the following load balancing algorithms:
 
-## Algorithms
+- Round Robin
+- Weighted Round Robin
+- Random
+- Least Connections
 
-The load balancer supports a number of load balancing algorithms:
-- round robin
-- weighted round robin
-- random
-- least connections
+## Installation
+
+To install `go-load-balancer`, use the following command:
+
+    go get -u github.com/open-webtech/go-load-balancer
 
 ## Schema
 
-The schema is kinda simplified, but the main idea like that:
+The schema is kinda simplified, but the main idea is like that:
 
-![schema](https://i.ibb.co/tPJT5WN/Screenshot-2020-01-10-at-14-12-55.png)
+![Schema](./docs/assets/schema.png)
 
-## Example
-
+## Examples
 
 ### Round Robin
-Here comes a simple round robin load balancer instantiation and usage:
+
+To demonstrate the Round Robin load balancing algorithm, let's create an instance and use it:
 
 ```golang
 func main() {
@@ -58,7 +59,8 @@ func main() {
 }
 ```
 
-Output:
+**Output:**
+
 ```text
 2019/12/04 11:59:23 load balancer started at port :8080
 2019/12/04 11:59:24 got 0 resp: --- short resp ---
@@ -69,6 +71,7 @@ Output:
 ```
 
 ### Weighted Round Robin
+
 The weighted round robin takes a mapping between proxies and their weights and distributes incoming requests between them depending on the weights.
 
 ```golang
@@ -84,7 +87,8 @@ func main() {
 }
 ```
 
-Output:
+**Output:**
+
 ```text
 2020/01/14 11:44:30 load balancer started at port :8080
 2020/01/14 11:44:30 got 0 resp: --- short resp ---
@@ -95,7 +99,10 @@ Output:
 ```
 
 ### Random
-The random load balancer, as its name implies, matches clients and servers by random. Its constructor accepts a function called _seed_ to initialize the random number generator state to allow the state customization e.g. for debugging using rand.Seed(1).
+
+The random load balancer, as its name implies, matches clients and servers randomly.
+Its constructor accepts a function called `seed` to initialize the random number generator state.
+To customize the state for debugging, use `rand.Seed(1)` for example.
 
 ```golang
 func main() {
@@ -111,6 +118,7 @@ func main() {
 ```
 
 ### Least Connections
+
 The least connections load balancer chooses the least loaded available proxy to serve a request.
 
 ```golang
@@ -120,3 +128,7 @@ The least connections load balancer chooses the least loaded available proxy to 
 
 	// ...
 ```
+
+## Acknowledgements
+
+This project is a fork of [go-load-balancer](https://github.com/sotnikov-s/go-load-balancer) by [Sergio Sotnikov](https://github.com/sotnikov-s).
