@@ -7,23 +7,23 @@ import (
 	"time"
 )
 
-// NewProxyHealth is the ProxyHealth constructor
-func NewProxyHealth(origin *url.URL) *ProxyHealth {
-	h := &ProxyHealth{
+// NewHealthCheck is the ProxyHealth constructor
+func NewHealthCheck(origin *url.URL) *HealthCheck {
+	h := &HealthCheck{
 		origin:      origin,
-		check:       defaultHealthCheck,
+		check:       defaultHealthCheckFunc,
 		period:      defaultHealthCheckPeriod,
 		cancel:      make(chan struct{}),
-		isAvailable: defaultHealthCheck(origin),
+		isAvailable: defaultHealthCheckFunc(origin),
 	}
 	h.run()
 
 	return h
 }
 
-// ProxyHealth is looking after the proxy origin availability using either a set by
-// ProxyHealth.SetHealthCheck check function or the defaultHealthCheck func.
-type ProxyHealth struct {
+// HealthCheck is looking after the proxy origin availability using either a set by
+// HealthCheck.SetHealthCheck check function or the defaultHealthCheck func.
+type HealthCheck struct {
 	origin *url.URL
 
 	mu          sync.Mutex
@@ -34,17 +34,17 @@ type ProxyHealth struct {
 }
 
 // IsAvailable returns whether the proxy origin was successfully connected at the last check time.
-func (h *ProxyHealth) IsAvailable() bool {
+func (h *HealthCheck) IsAvailable() bool {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	return h.isAvailable
 }
 
-// SetHealthCheck sets the passed check func as the algorithm of checking the origin availability and
-// calls for it with interval defined with the passed period variable. The SetHealthCheck provides a
+// SetCheckFunc sets the passed check func as the algorithm of checking the origin availability and
+// calls for it with interval defined with the passed period variable. The SetCheckFunc provides a
 // concurrency save way of setting and replacing the current health check algorithm, so the Stop function
-// shouldn't be called before the SetHealthCheck call.
-func (h *ProxyHealth) SetHealthCheck(check func(addr *url.URL) bool, period time.Duration) {
+// shouldn't be called before the SetCheckFunc call.
+func (h *HealthCheck) SetCheckFunc(check func(addr *url.URL) bool, period time.Duration) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
@@ -57,14 +57,14 @@ func (h *ProxyHealth) SetHealthCheck(check func(addr *url.URL) bool, period time
 }
 
 // Stop gracefully stops the instance execution. Should be called when the instance work is no more needed.
-func (h *ProxyHealth) Stop() {
+func (h *HealthCheck) Stop() {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	h.stop()
 }
 
 // run runs the check func in a new goroutine.
-func (h *ProxyHealth) run() {
+func (h *HealthCheck) run() {
 	checkHealth := func() {
 		h.mu.Lock()
 		defer h.mu.Unlock()
@@ -87,7 +87,7 @@ func (h *ProxyHealth) run() {
 }
 
 // stop stops the currently rinning check func.
-func (h *ProxyHealth) stop() {
+func (h *HealthCheck) stop() {
 	if h.cancel != nil {
 		h.cancel <- struct{}{}
 		close(h.cancel)
@@ -95,8 +95,8 @@ func (h *ProxyHealth) stop() {
 	}
 }
 
-// defaultHealthCheck is the default most simple check function
-var defaultHealthCheck = func(addr *url.URL) bool {
+// defaultHealthCheckFunc is the default most simple check function
+var defaultHealthCheckFunc = func(addr *url.URL) bool {
 	conn, err := net.DialTimeout("tcp", addr.Host, defaultHealthCheckTimeout)
 	if err != nil {
 		return false

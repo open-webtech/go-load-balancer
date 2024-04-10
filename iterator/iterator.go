@@ -6,5 +6,5 @@ import "github.com/open-webtech/go-load-balancer/proxy"
 type Iterator interface {
 	// Next returns the next proxy to be used. It returns an error if all the proxies
 	// turned out to be unavailable
-	Next() (*proxy.Proxy, error)
+	Next() (proxy.Proxy, error)
 }

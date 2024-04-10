@@ -13,9 +13,9 @@ func TestTrueIsAvailable(t *testing.T) {
 	ts := httptest.NewServer(nil)
 	defer ts.Close()
 	origin, _ := url.Parse(ts.URL)
-	h := NewProxyHealth(origin)
+	h := NewHealthCheck(origin)
 
-	h.SetHealthCheck(func(_ *url.URL) bool {
+	h.SetCheckFunc(func(_ *url.URL) bool {
 		return true
 	}, time.Second)
 
@@ -28,9 +28,9 @@ func TestFalseIsAvailable(t *testing.T) {
 	ts := httptest.NewServer(nil)
 	defer ts.Close()
 	origin, _ := url.Parse(ts.URL)
-	h := NewProxyHealth(origin)
+	h := NewHealthCheck(origin)
 
-	h.SetHealthCheck(func(_ *url.URL) bool {
+	h.SetCheckFunc(func(_ *url.URL) bool {
 		return false
 	}, time.Second)
 
@@ -43,9 +43,9 @@ func TestStop(t *testing.T) {
 	ts := httptest.NewServer(nil)
 	defer ts.Close()
 	origin, _ := url.Parse(ts.URL)
-	h := NewProxyHealth(origin)
+	h := NewHealthCheck(origin)
 
-	h.SetHealthCheck(func(_ *url.URL) bool {
+	h.SetCheckFunc(func(_ *url.URL) bool {
 		return true
 	}, time.Second)
 	h.Stop()
@@ -57,19 +57,19 @@ func TestMultipleSetHealthCheck(t *testing.T) {
 	ts := httptest.NewServer(nil)
 	defer ts.Close()
 	origin, _ := url.Parse(ts.URL)
-	h := NewProxyHealth(origin)
+	h := NewHealthCheck(origin)
 
-	h.SetHealthCheck(func(_ *url.URL) bool {
+	h.SetCheckFunc(func(_ *url.URL) bool {
 		return true
 	}, time.Second)
 	assert.Equal(t, true, h.IsAvailable())
 
-	h.SetHealthCheck(func(_ *url.URL) bool {
+	h.SetCheckFunc(func(_ *url.URL) bool {
 		return false
 	}, time.Second)
 	assert.Equal(t, false, h.IsAvailable())
 
-	h.SetHealthCheck(func(_ *url.URL) bool {
+	h.SetCheckFunc(func(_ *url.URL) bool {
 		return true
 	}, time.Second)
 	assert.Equal(t, true, h.IsAvailable())
@@ -81,7 +81,7 @@ func TestHealthCheckContinuity(t *testing.T) {
 	ts := httptest.NewServer(nil)
 	defer ts.Close()
 	origin, _ := url.Parse(ts.URL)
-	h := NewProxyHealth(origin)
+	h := NewHealthCheck(origin)
 
 	ch := make(chan int)
 	go func() {
@@ -93,7 +93,7 @@ func TestHealthCheckContinuity(t *testing.T) {
 	}()
 
 	var res int
-	h.SetHealthCheck(func(_ *url.URL) bool {
+	h.SetCheckFunc(func(_ *url.URL) bool {
 		ch <- res
 		res++
 		return true

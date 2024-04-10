@@ -7,8 +7,8 @@ import (
 )
 
 // NewWeightedRoundRobin accepts a map from a proxy to its weight and returns the iterator which
-// will switch between proxies depending on their weight
-func NewWeightedRoundRobin(proxies map[*proxy.Proxy]int32) Iterator {
+// will switch between proxies depending on their weight.
+func NewWeightedRoundRobin(proxies map[proxy.Proxy]int32) Iterator {
 	bunch := make(weightedProxiesBunch, 0, len(proxies))
 	for p, w := range proxies {
 		bunch = append(bunch, &proxyWithWeight{
@@ -23,7 +23,7 @@ func NewWeightedRoundRobin(proxies map[*proxy.Proxy]int32) Iterator {
 }
 
 // WeightedRoundRobin is like the round robin iterator but with possibility to set
-// weights to proxies
+// weights to proxies.
 type WeightedRoundRobin struct {
 	proxies weightedProxiesBunch
 
@@ -32,8 +32,8 @@ type WeightedRoundRobin struct {
 	reqCount int32
 }
 
-// Next returns the next proxy or the current one depending on its usage
-func (w *WeightedRoundRobin) Next() (*proxy.Proxy, error) {
+// Next returns the next proxy or the current one depending on its usage.
+func (w *WeightedRoundRobin) Next() (proxy.Proxy, error) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
