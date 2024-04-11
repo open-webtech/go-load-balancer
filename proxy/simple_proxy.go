@@ -11,11 +11,15 @@ import (
 )
 
 // NewSimpleProxy is the SimpleProxy constructor
-func NewSimpleProxy(addr *url.URL) *SimpleProxy {
-	return &SimpleProxy{
-		proxy:  httputil.NewSingleHostReverseProxy(addr),
-		health: health.NewHealthCheck(addr),
+func NewSimpleProxy(addr string) (*SimpleProxy, error) {
+	u, err := url.Parse(addr)
+	if err != nil {
+		return nil, err
 	}
+	return &SimpleProxy{
+		proxy:  httputil.NewSingleHostReverseProxy(u),
+		health: health.NewHealthCheck(u),
+	}, nil
 }
 
 // SimpleProxy is a simple HTTP proxy entity
