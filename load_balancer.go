@@ -8,11 +8,19 @@ import (
 
 // NewLoadBalancer returns the LoadBalancer instance with the specified iterator
 func NewLoadBalancer(iterator iterator.Iterator) *LoadBalancer {
-	return &LoadBalancer{iter: iterator}
+	return &LoadBalancer{
+		iter: iterator,
+		ErrorHandler: func(w http.ResponseWriter, r *http.Request,err error) {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+		},
+	}
 }
 
 // LoadBalancer handles requests distributing them between one or more proxies
 type LoadBalancer struct {
+	ErrorHandler func(http.ResponseWriter, *http.Request, error)
+
 	iter iterator.Iterator
 }
 
@@ -20,8 +28,7 @@ type LoadBalancer struct {
 func (l *LoadBalancer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	p, err := l.iter.Next()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("The server didn't respond"))
+		l.ErrorHandler(w, r, err)
 		return
 	}
 	p.ServeHTTP(w, r)
